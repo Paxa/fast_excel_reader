@@ -1,0 +1,54 @@
+GIT
+  remote: https://github.com/paxa/process_memory.git
+  revision: 282c75336a4a6b92207cd1eaa57f20887b92601e
+  specs:
+    process_memory (0.1)
+
+PATH
+  remote: .
+  specs:
+    fast_excel_reader (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.6.0)
+      public_suffix (>= 2.0.2, < 4.0)
+    creek (2.4.1)
+      http (~> 3.0)
+      nokogiri (>= 1.7.0)
+      rubyzip (>= 1.0.0)
+    domain_name (0.5.20180417)
+      unf (>= 0.0.5, < 1.0.0)
+    http (3.3.0)
+      addressable (~> 2.3)
+      http-cookie (~> 1.0)
+      http-form_data (~> 2.0)
+      http_parser.rb (~> 0.6.0)
+    http-cookie (1.0.3)
+      domain_name (~> 0.5)
+    http-form_data (2.1.1)
+    http_parser.rb (0.6.0)
+    mini_portile2 (2.4.0)
+    nokogiri (1.10.1)
+      mini_portile2 (~> 2.4.0)
+    public_suffix (3.0.3)
+    roo (2.8.2)
+      nokogiri (~> 1)
+      rubyzip (>= 1.2.1, < 2.0.0)
+    rubyzip (1.2.2)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  creek
+  fast_excel_reader!
+  process_memory!
+  roo
+
+BUNDLED WITH
+   2.0.1

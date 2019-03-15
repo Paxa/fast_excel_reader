@@ -1,0 +1,8 @@
+.ruby-version
+.DS_Store
+example_files/_*
+
+ext/fast_excel_reader/Makefile
+ext/fast_excel_reader/reader_ext.bundle
+ext/fast_excel_reader/mkmf.log
+ext/fast_excel_reader/reader_ext.o
