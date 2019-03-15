@@ -1,0 +1,36 @@
+language: c
+
+os:
+  - osx
+  - linux
+  - windows
+
+# linux distro
+dist: xenial
+
+addons:
+  apt:
+    packages: ["libminizip-dev"]
+  homebrew:
+    packages: ["minizip"]
+
+matrix:
+  allow_failures:
+    - os: windows
+
+#before_script:
+#  - wget https://github.com/nmoinvaz/minizip/archive/2.8.4.zip
+#  - unzip 2.8.4.zip
+#  - cd minizip-2.8.4
+#  - mkdir build
+#  - cd build
+#  - cmake .. -DMZ_BUILD_TEST=ON -DMZ_BUILD_UNIT_TEST=ON -DCMAKE_BUILD_TYPE=Release
+#  - sudo cmake --build . --config Release
+#  - cd ../..
+
+
+script:
+  - cmake .
+  - cmake --build .
+  - ./example_xlsxio_write
+  - ls -lah example.xlsx

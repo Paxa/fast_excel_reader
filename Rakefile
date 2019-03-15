@@ -5,6 +5,7 @@ task :sync_xlsxio do
   FileUtils.rm_rf(target_path)
   system("git clone --depth 10 git@github.com:Paxa/xlsxio.git #{target_path}")
   Dir.chdir(target_path) do
+    system("git show --pretty='format:%cd %h' --date=iso --quiet > version.txt")
     FileUtils.rm_rf("./.git")
     FileUtils.rm_rf("./CMake")
     FileUtils.rm_rf("./doc")
