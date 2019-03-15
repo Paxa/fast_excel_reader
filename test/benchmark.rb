@@ -1,4 +1,4 @@
-require_relative 'lib/fast_excel_reader'
+require_relative '../lib/fast_excel_reader'
 
 require 'bundler/setup'
 require 'process_memory'
@@ -20,7 +20,7 @@ def measure_memory(title)
 end
 
 #test_file = File.dirname(__FILE__) + "/test_dates.xlsx"
-test_file = "/Users/pavel/Downloads/201903_08_R5401_70002_08032019.xlsx"
+test_file = "./example_files/financial_sample.xlsx"
 
 measure_memory("fast_excel_reader") do
   reader = FastExcelReader::Reader.open(test_file)

@@ -1,11 +1,11 @@
-require_relative 'lib/fast_excel_reader'
+require_relative '../lib/fast_excel_reader'
 
 require 'pp'
 require 'time'
 require 'roo'
 require 'creek'
 
-example_file = File.dirname(__FILE__) + "/example_files/mrt_report.xlsx"
+example_file = File.dirname(__FILE__) + "/../example_files/financial_sample.xlsx"
 
 def read_fast(filename)
   rows = []

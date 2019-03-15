@@ -22,7 +22,7 @@ end
 
 desc "Compile libxlsxwriter shared library"
 task :compile do
-  %x{
+  puts %x{
     cd ext/fast_excel_reader
     ruby ./extconf.rb
     make

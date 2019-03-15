@@ -4,8 +4,6 @@ require 'mkmf'
 local_xlsxio = File.expand_path(File.dirname(__FILE__) + "/xlsxio")
 xlsxio_inc, xlsxio_lib = dir_config('xlsxio', local_xlsxio + "/include", local_xlsxio)
 
-p local_xlsxio
-
 find_library('xlsxio_read', 'xlsxioread_open', xlsxio_lib)
 have_library('xlsxio_read', 'xlsxioread_open', 'xlsxio_read.h')
 

@@ -1,6 +1,7 @@
 .ruby-version
 .DS_Store
 example_files/_*
+*.gem
 
 ext/fast_excel_reader/Makefile
 ext/fast_excel_reader/reader_ext.bundle
