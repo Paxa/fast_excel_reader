@@ -1,0 +1,13 @@
+FROM drecom/centos-ruby:2.6.1-slim
+
+RUN yum -y install gcc make
+RUN yum -y install minizip-devel expat-devel
+
+WORKDIR /opt/app
+ADD . /opt/app/
+
+RUN rake compile
+
+RUN ruby test/try.rb
+
+RUN gem install ./fast_excel_reader-0.1.0.gem

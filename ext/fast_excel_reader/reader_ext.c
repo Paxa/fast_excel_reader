@@ -4,7 +4,7 @@
 #include <xlsxio_read.h>
 
 // days between 1970-jan-01 and 1900-jan-01
-static double XLSX_DATE_DAY = 86400.0;
+static double XLSX_DATE_DAY        = 86400.0;
 static double XLSX_DATE_EPOCH_DIFF = 25569.0;
 
 void xlsxioread_finalizer(xlsxioreader xlsxioread) {
@@ -17,6 +17,7 @@ void xlsxioread_finalizer(xlsxioreader xlsxioread) {
 
 VALUE rb_reader_open(VALUE klass, VALUE filename) {
   char *filename_str = StringValueCStr(filename);
+  VALUE result;
 
   xlsxioreader xlsxioread;
 
@@ -25,19 +26,18 @@ VALUE rb_reader_open(VALUE klass, VALUE filename) {
     return Qnil;
   }
 
-  VALUE result = Data_Wrap_Struct(klass, NULL, xlsxioread_finalizer, xlsxioread);
+  result = Data_Wrap_Struct(klass, NULL, xlsxioread_finalizer, xlsxioread);
 
   return result;
 }
 
 VALUE rb_sheet_names(VALUE self) {
-  xlsxio_read_struct * xlsxioread;
-  Data_Get_Struct(self, struct xlsxio_read_struct, xlsxioread);
-
   VALUE rb_sheet_names = rb_ary_new();
-
+  xlsxio_read_struct *  xlsxioread;
   xlsxioreadersheetlist sheetlist;
-  const XLSXIOCHAR* sheetname;
+  const XLSXIOCHAR *    sheetname;
+
+  Data_Get_Struct(self, struct xlsxio_read_struct, xlsxioread);
 
   if ((sheetlist = xlsxioread_sheetlist_open(xlsxioread)) != NULL) {
     while ((sheetname = xlsxioread_sheetlist_next(sheetlist)) != NULL) {
@@ -53,11 +53,19 @@ VALUE rb_yield_values_1(VALUE arg) {
   return rb_yield_values(1, arg);
 }
 
-VALUE rb_each_row(int argc, VALUE* argv, VALUE self) {
-  xlsxio_read_struct * xlsxioread;
-  Data_Get_Struct(self, struct xlsxio_read_struct, xlsxioread);
-  VALUE cTime = rb_const_get(rb_cObject, rb_intern("Time"));
+VALUE rb_each_row(int argc, VALUE *argv, VALUE self) {
+  char * sheet_name_str = NULL;
+  int    yieldException = 0;
+  VALUE  cTime          = rb_const_get(rb_cObject, rb_intern("Time"));
+  VALUE  timeObject;
+  double tz_offset_dbl, timestamp;
 
+  xlsxioread_cell     value;
+  xlsxio_read_struct *xlsxioread;
+  xlsxioreadersheet   sheet;
+
+
+  // parse arguments
   VALUE sheet_name = Qnil, tz_offset = Qnil, opts, kwargs[2];
   rb_scan_args(argc, argv, ":", &opts);
 
@@ -69,37 +77,32 @@ VALUE rb_each_row(int argc, VALUE* argv, VALUE self) {
 
     rb_get_kwargs(opts, kwargs_ids, 0, 2, kwargs);
     sheet_name = kwargs[0];
-    tz_offset = kwargs[1];
+    tz_offset  = kwargs[1];
   }
 
-  char *sheet_name_str = NULL;
   if (!NIL_P(sheet_name)) {
     sheet_name_str = StringValueCStr(sheet_name);
   }
 
   if (NIL_P(tz_offset) || tz_offset == Qundef) {
-    VALUE timeObject = rb_funcall(cTime, rb_intern("at"), 1, DBL2NUM(0));
-    tz_offset = rb_funcall(timeObject, rb_intern("utc_offset"), 0);
+    timeObject = rb_funcall(cTime, rb_intern("at"), 1, DBL2NUM(0));
+    tz_offset  = rb_funcall(timeObject, rb_intern("utc_offset"), 0);
   }
+  tz_offset_dbl = NUM2DBL(tz_offset);
 
   //printf("sheet name: %s tz_offset: %f \n", sheet_name_str, NUM2DBL(tz_offset));
 
-  xlsxioreadersheet sheet = xlsxioread_sheet_open(xlsxioread, sheet_name_str, XLSXIOREAD_SKIP_EMPTY_ROWS);
+  Data_Get_Struct(self, struct xlsxio_read_struct, xlsxioread);
+  sheet = xlsxioread_sheet_open(xlsxioread, sheet_name_str, XLSXIOREAD_SKIP_EMPTY_ROWS);
 
   if (sheet == NULL) {
     if (sheet_name_str) {
-      rb_raise(rb_eArgError, "Can not find sheet %"PRIsVALUE" in file", sheet_name);
+      rb_raise(rb_eArgError, "Can not find sheet %" PRIsVALUE " in file", sheet_name);
     } else {
       rb_raise(rb_eArgError, "Can not find any sheet in xlsx file");
     }
     return T_FALSE;
   }
-
-  xlsxioread_cell value;
-
-  double tz_offset_dbl = NUM2DBL(tz_offset);
-  double float_val, timestamp;
-  int yieldException = 0;
 
   while (xlsxioread_sheet_next_row(sheet)) {
     VALUE rb_cells = rb_ary_new();
@@ -108,19 +111,19 @@ VALUE rb_each_row(int argc, VALUE* argv, VALUE self) {
 
     while ((value = xlsxioread_sheet_next_cell_struct(sheet)) != NULL) {
       switch (value->cell_type) {
-        case cell_type_none: case cell_type_string:
+        case cell_type_none:
+        case cell_type_string:
           rb_ary_push(rb_cells, rb_str_new2(value->data));
           break;
         case cell_type_boolean:
           rb_ary_push(rb_cells, strcmp(value->data, "1") == 0 ? T_TRUE : T_FALSE);
           break;
         case cell_type_value:
-          float_val = atof(value->data);
-          rb_ary_push(rb_cells, DBL2NUM(float_val));
+          rb_ary_push(rb_cells, DBL2NUM(atof(value->data)));
           break;
         case cell_type_date:
-          timestamp = (atof(value->data) - XLSX_DATE_EPOCH_DIFF) * XLSX_DATE_DAY - tz_offset_dbl;
-          VALUE timeObject = rb_funcall(cTime, rb_intern("at"), 1, DBL2NUM(timestamp));
+          timestamp  = (atof(value->data) - XLSX_DATE_EPOCH_DIFF) * XLSX_DATE_DAY - tz_offset_dbl;
+          timeObject = rb_funcall(cTime, rb_intern("at"), 1, DBL2NUM(timestamp));
           rb_ary_push(rb_cells, timeObject);
           break;
       }
@@ -156,18 +159,16 @@ VALUE rb_each_row(int argc, VALUE* argv, VALUE self) {
 }
 
 VALUE rb_close(VALUE self) {
-
-  xlsxio_read_struct * xlsxioread;
+  xlsxio_read_struct *xlsxioread;
   Data_Get_Struct(self, struct xlsxio_read_struct, xlsxioread);
   xlsxioread_finalizer(xlsxioread);
 
   return T_TRUE;
 }
 
-void Init_reader_ext()
-{
+void Init_reader_ext() {
   VALUE FastExcelReader = rb_define_module("FastExcelReader");
-  VALUE Reader = rb_define_class_under(FastExcelReader, "Reader", rb_cObject);
+  VALUE Reader          = rb_define_class_under(FastExcelReader, "Reader", rb_cObject);
 
   rb_define_singleton_method(Reader, "open", rb_reader_open, 1);
   rb_define_method(Reader, "sheet_names", rb_sheet_names, 0);

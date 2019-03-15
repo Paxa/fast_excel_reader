@@ -22,9 +22,13 @@ end
 
 desc "Compile libxlsxwriter shared library"
 task :compile do
-  puts %x{
-    cd ext/fast_excel_reader
-    ruby ./extconf.rb
-    make
-  }
+  Dir.chdir("ext/fast_excel_reader") do
+    system %{
+      ruby ./extconf.rb
+    }
+    system %{
+      make clean
+      make
+    }
+  end
 end

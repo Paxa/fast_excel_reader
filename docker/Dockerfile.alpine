@@ -1,0 +1,16 @@
+FROM ruby:2.6-alpine3.8
+
+RUN apk update && apk upgrade && \
+    apk add bash build-base make gcc g++ nano && \
+    rm -rf /var/cache/apk/*
+
+RUN apk add minizip-dev expat-dev --no-cache
+
+WORKDIR /opt/app
+ADD . /opt/app/
+
+RUN rake compile
+
+RUN ruby test/try.rb
+
+RUN gem install ./fast_excel_reader-0.1.0.gem

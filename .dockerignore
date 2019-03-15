@@ -1,0 +1,6 @@
+.git
+ext/fast_excel_reader/Makefile
+ext/fast_excel_reader/reader_ext.bundle
+.DS_Store
+*.o
+docker/*

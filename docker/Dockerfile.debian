@@ -1,0 +1,14 @@
+FROM ruby:2.6-slim
+
+RUN apt-get update
+RUN apt install -y build-essential
+RUN apt install -y libminizip-dev libexpat-dev
+
+WORKDIR /opt/app
+ADD . /opt/app/
+
+RUN rake compile
+
+RUN ruby test/try.rb
+
+RUN gem install ./fast_excel_reader-0.1.0.gem

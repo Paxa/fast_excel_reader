@@ -2,10 +2,8 @@ require_relative '../lib/fast_excel_reader'
 
 require 'pp'
 require 'time'
-require 'roo'
-require 'creek'
 
-example_file = File.dirname(__FILE__) + "/../example_files/financial_sample.xlsx"
+example_file = File.dirname(__FILE__) + "/../example_files/test_types.xlsx"
 
 def read_fast(filename)
   rows = []
@@ -21,6 +19,7 @@ def read_fast(filename)
 end
 
 def read_roo(filename)
+  require 'roo'
   rows = []
   excel = Roo::Spreadsheet.open(filename)
 
@@ -34,6 +33,7 @@ def read_roo(filename)
 end
 
 def read_creek(filename)
+  require 'creek'
   rows = []
   creek = Creek::Book.new(filename)
 
@@ -47,8 +47,8 @@ def read_creek(filename)
 end
 
 pp read_fast(example_file)[0..3]
-puts
-pp read_roo(example_file)[0..3]
-puts
-pp read_creek(example_file)[0..3]
-puts
+#puts
+#pp read_roo(example_file)[0..3]
+#puts
+#pp read_creek(example_file)[0..3]
+#puts
